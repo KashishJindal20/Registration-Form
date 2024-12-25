@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Registration2.css'; // Ensure the styles are correctly imported
 import 'font-awesome/css/font-awesome.min.css';
+import axios from 'axios'; // Import axios for HTTP requests
 
 function App() {
   const [formValues, setFormValues] = useState({
@@ -70,7 +71,7 @@ function App() {
     setPasswordVisible((prev) => !prev);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formValues.password !== formValues.retypePassword) {
@@ -79,22 +80,31 @@ function App() {
     }
 
     showNotification('Processing registration...', 'info');
-    setTimeout(() => {
-      console.log('Registration attempted with:', formValues);
-      showNotification('Registration successful!', 'success');
-      setFormValues({
-        name: '',
-        email: '',
-        phone: '',
-        birthDate: '',
-        city: '',
-        gender: '',
-        password: '',
-        retypePassword: '',
-        comments: '',
-        agreeTerms: false,
-      });
-    }, 2000);
+    
+    try {
+      // Send form data to the backend
+      const response = await axios.post('http://localhost:5000/api/form', formValues);
+
+      if (response.status === 201) {
+        showNotification('Registration successful!', 'success');
+        setFormValues({
+          name: '',
+          email: '',
+          phone: '',
+          birthDate: '',
+          city: '',
+          gender: '',
+          password: '',
+          retypePassword: '',
+          comments: '',
+          agreeTerms: false,
+        });
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      showNotification('Error during registration. Please try again!', 'error');
+    }
+    
   };
 
   const showNotification = (message, type) => {
@@ -250,7 +260,7 @@ function App() {
               (e.target.innerHTML = '<i class="fa fa-rocket"></i> Let\'s Go!')
             }
             onMouseLeave={(e) =>
-              (e.target.innerHTML = '<i class="fa fa-user-plus"></i> Register')
+              (e.target.innerHTML = '<i className="fa fa-user-plus"></i> Register')
             }
           >
             <i className="fa fa-user-plus"></i> Register
@@ -262,8 +272,6 @@ function App() {
           </div>
         )}
       </div>
- 
-
     </div>
   );
 }
